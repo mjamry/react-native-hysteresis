@@ -2,7 +2,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View } from 'react-native';
-import HysteresisControl from 'react-native-test-module';
+import HysteresisControl from 'react-native-hysteresis';
 
 export default function App() {
   return (
