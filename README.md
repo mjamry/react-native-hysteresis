@@ -1,22 +1,32 @@
-# react-native-test-module
+# react-native-hysteresis
 
-ll
+UI component allowing to setup hysteresis range.
+Most basic usage is to control heating or cooling devices.
 
 ## Installation
 
 ```sh
-npm install react-native-test-module
+npm install react-native-hysteresis
+OR
+yarn add react-native-hysteresis
 ```
 
 ## Usage
 
 ```js
-import { TestModuleView } from "react-native-test-module";
+import { HysteresisControl } from "react-native-test-module";
 
 // ...
 
-<TestModuleView color="tomato" />
+<HysteresisControl
+  range={{ min: 0, max: 50 }}
+  step={5}
+  initialValues={{ min: 10, max: 20 }}
+  onChange={(e) => console.log(e)}
+/>
+
 ```
+#### For better understanding see the included example app.
 
 ## Contributing
 
@@ -26,6 +36,3 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 
 MIT
 
----
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
