@@ -1,12 +1,26 @@
+/* eslint-disable react-native/no-inline-styles */
 import * as React from 'react';
 
 import { StyleSheet, View } from 'react-native';
-import { TestModuleView } from 'react-native-test-module';
+import HysteresisControl from 'react-native-test-module';
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <TestModuleView color="#32a852" style={styles.box} />
+      <HysteresisControl
+        range={{ min: 0, max: 50 }}
+        step={5}
+        initialValues={{ min: 10, max: 20 }}
+        onChange={(e) => console.log(e)}
+        style={{
+          paddingBottom: 20,
+          paddingLeft: 20,
+          paddingTop: 20,
+          paddingRight: 20,
+          height: 300,
+          width: 300,
+        }}
+      />
     </View>
   );
 }
