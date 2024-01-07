@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  TestModuleExample
+//  HysteresisExample
 //
 
 import Foundation
