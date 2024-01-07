@@ -14,7 +14,7 @@ yarn add react-native-hysteresis
 ## Usage
 
 ```js
-import { HysteresisControl } from "react-native-test-module";
+import { HysteresisControl } from "react-native-hysteresis";
 
 // ...
 
@@ -27,6 +27,10 @@ import { HysteresisControl } from "react-native-test-module";
 
 ```
 #### For better understanding see the included example app.
+
+![Alt text](assets/image.png)
+![Alt text](assets/image-1.png)
+![Alt text](assets/image-2.png)
 
 ## Contributing
 
