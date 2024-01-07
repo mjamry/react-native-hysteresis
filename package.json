@@ -1,7 +1,7 @@
 {
-  "name": "react-native-test-module",
+  "name": "react-native-hysteresis",
   "version": "0.1.0",
-  "description": "ll",
+  "description": "UI component allowing to setup hysteresis range",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/src/index.d.ts",
@@ -41,14 +41,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mjamry/react-native-test-module.git"
+    "url": "git+https://github.com/mjamry/react-native-hysteresis.git"
   },
   "author": "mjamry <michal.jamry@gmail.com> (https://github.com/mjamry)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mjamry/react-native-test-module/issues"
+    "url": "https://github.com/mjamry/react-native-hysteresis/issues"
   },
-  "homepage": "https://github.com/mjamry/react-native-test-module#readme",
+  "homepage": "https://github.com/mjamry/react-native-hysteresis#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
@@ -161,5 +161,9 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "@shopify/react-native-skia": "^0.1.231",
+    "react-native-gesture-handler": "^2.14.0"
   }
 }
