@@ -37,10 +37,11 @@ const MinTouchRadius = 20;
 const DefaultFontWeight = 'normal';
 const DefaultFontSize = 15;
 const DefaultFontStyle = 'normal';
-const DefaultFontFamily = 'serif';
+const DefaultFontFamily = 'arial';
 const DefaultFontColor = 'black';
 const DefaultControlLabelWidth = 35;
 const DefaultControlLabelHeight = 25;
+//TODO: allow to use inverted hysteresis lines
 const HysteresisControl = (props: HysteresisProps) => {
   const {
     range,
@@ -91,7 +92,6 @@ const HysteresisControl = (props: HysteresisProps) => {
     height - (showAxisLabels ? axisLabelSize : 0) - paddingBottom;
   const y_axis_pos = paddingLeft;
   const x_axis_len = width - paddingLeft - paddingRight;
-  const y_axis_len = height - paddingTop - paddingBottom;
   const axis_line_length = 10;
   const hysteresis_axis_distance = 20;
   const line_space = x_axis_len / ((range.max - range.min) / step);
@@ -116,11 +116,11 @@ const HysteresisControl = (props: HysteresisProps) => {
     const path = Skia.Path.Make();
     // x axis
     path.moveTo(paddingLeft, x_axis_pos);
-    path.lineTo(width, x_axis_pos);
+    path.lineTo(width - paddingRight, x_axis_pos);
     // y axis
     if (showYAxis) {
       path.moveTo(y_axis_pos, paddingTop);
-      path.lineTo(y_axis_pos, y_axis_len);
+      path.lineTo(y_axis_pos, x_axis_pos);
     }
 
     const y_start = x_axis_pos - axis_line_length / 2;
@@ -158,6 +158,8 @@ const HysteresisControl = (props: HysteresisProps) => {
       fontStyle: axisStyle?.fontStyle ?? DefaultFontStyle,
       fontWeight: axisStyle?.fontWeight ?? DefaultFontWeight,
     });
+    //TODO: render unit
+    //TODO: render On/Off on Y axis
     for (
       let i = y_axis_pos, index = range.min;
       index <= range.max;
@@ -200,10 +202,15 @@ const HysteresisControl = (props: HysteresisProps) => {
   const renderControl = (x_pos: number, color: string) => {
     return (
       <>
-        <Circle cx={x_pos} cy={control_y_pos} r={controlSize} color={color} />
         <Circle
           cx={x_pos}
-          cy={control_y_pos}
+          cy={control_y_pos - controlSize / 2}
+          r={controlSize}
+          color={color}
+        />
+        <Circle
+          cx={x_pos}
+          cy={control_y_pos - controlSize / 2}
           r={controlSize - controlWidth}
           color={controlBackground}
         />
@@ -214,7 +221,7 @@ const HysteresisControl = (props: HysteresisProps) => {
   const renderHysteresisLow = () => {
     const maxPos = calc_hysteresis_x_pos(max);
     const path = Skia.Path.Make();
-    path.moveTo(0, x_axis_pos - hysteresis_axis_distance);
+    path.moveTo(paddingLeft, x_axis_pos - hysteresis_axis_distance);
     path.lineTo(maxPos, x_axis_pos - hysteresis_axis_distance);
     path.lineTo(maxPos, hysteresis_height);
     path.moveTo(0, 0);
@@ -242,7 +249,7 @@ const HysteresisControl = (props: HysteresisProps) => {
 
     path.moveTo(minPos, x_axis_pos - hysteresis_axis_distance);
     path.lineTo(minPos, hysteresis_height);
-    path.lineTo(width, hysteresis_height);
+    path.lineTo(width - paddingRight, hysteresis_height);
     path.moveTo(0, 0);
     path.close();
 
