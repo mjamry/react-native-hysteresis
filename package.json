@@ -165,5 +165,9 @@
   "dependencies": {
     "@shopify/react-native-skia": "^0.1.231",
     "react-native-gesture-handler": "^2.14.0"
+  },
+  "directories": {
+    "example": "example",
+    "lib": "lib"
   }
 }
