@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "react-native-test-module": ["./src/index"]
+      "react-native-hysteresis": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
