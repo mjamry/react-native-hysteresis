@@ -42,6 +42,8 @@ export type FontStyle = {
 
 export type AxisStyle = LineStyle & FontStyle;
 
+export type HysteresisPosition = 'top' | 'bottom';
+
 export type HysteresisProps = {
   range: Range;
   initialValues: Range;
@@ -53,6 +55,7 @@ export type HysteresisProps = {
   showFill?: boolean;
   showYAxis?: boolean;
   showControlLabel?: boolean;
+  showInverted?: boolean;
   style?: Style;
   axisStyle?: AxisStyle;
   hysteresisLowStyle?: LineStyle;

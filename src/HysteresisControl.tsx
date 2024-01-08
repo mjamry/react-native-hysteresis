@@ -18,7 +18,10 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
-import type { HysteresisProps } from './HysteresisControl.types';
+import type {
+  HysteresisProps,
+  HysteresisPosition,
+} from './HysteresisControl.types';
 
 const styles = StyleSheet.create({
   container: {
@@ -41,7 +44,7 @@ const DefaultFontFamily = 'arial';
 const DefaultFontColor = 'black';
 const DefaultControlLabelWidth = 35;
 const DefaultControlLabelHeight = 25;
-//TODO: allow to use inverted hysteresis lines
+
 const HysteresisControl = (props: HysteresisProps) => {
   const {
     range,
@@ -52,6 +55,7 @@ const HysteresisControl = (props: HysteresisProps) => {
     showControlLabel,
     showYAxis,
     showFill,
+    showInverted,
     style,
     axisStyle,
     hysteresisLowStyle,
@@ -96,8 +100,9 @@ const HysteresisControl = (props: HysteresisProps) => {
   const hysteresis_axis_distance = 20;
   const line_space = x_axis_len / ((range.max - range.min) / step);
 
-  const hysteresis_height = paddingTop;
-  const control_y_pos = (x_axis_pos + hysteresis_height) / 2;
+  const hysteresis_y_bottom = x_axis_pos - hysteresis_axis_distance;
+  const hysteresis_y_top = paddingTop;
+  const control_y_pos = (x_axis_pos + hysteresis_y_top) / 2;
 
   const touch_radius =
     controlSize < MinTouchRadius ? MinTouchRadius : controlSize;
@@ -183,7 +188,7 @@ const HysteresisControl = (props: HysteresisProps) => {
   const renderHysteresisFill = () => {
     const x_start = calc_hysteresis_x_pos(min);
     const x_end = calc_hysteresis_x_pos(max) - x_start;
-    const y_start = hysteresis_height;
+    const y_start = hysteresis_y_top;
     const y_end = x_axis_pos - y_start;
 
     return (
@@ -218,12 +223,27 @@ const HysteresisControl = (props: HysteresisProps) => {
     );
   };
 
-  const renderHysteresisLow = () => {
-    const maxPos = calc_hysteresis_x_pos(max);
+  const renderHysteresisLine = (
+    position: HysteresisPosition,
+    value: number,
+    x_start: number,
+    lineColor: string,
+    lineWidth: number
+  ) => {
+    const x_end = calc_hysteresis_x_pos(value);
     const path = Skia.Path.Make();
-    path.moveTo(paddingLeft, x_axis_pos - hysteresis_axis_distance);
-    path.lineTo(maxPos, x_axis_pos - hysteresis_axis_distance);
-    path.lineTo(maxPos, hysteresis_height);
+    path.moveTo(
+      x_start,
+      position === 'bottom' ? hysteresis_y_top : hysteresis_y_bottom
+    );
+    path.lineTo(
+      x_end,
+      position === 'bottom' ? hysteresis_y_top : hysteresis_y_bottom
+    );
+    path.lineTo(
+      x_end,
+      position === 'bottom' ? hysteresis_y_bottom : hysteresis_y_top
+    );
     path.moveTo(0, 0);
     path.close();
 
@@ -231,41 +251,35 @@ const HysteresisControl = (props: HysteresisProps) => {
       <>
         <Path
           path={path}
-          color={hysteresisLowColor}
-          strokeWidth={hysteresisLowWidth}
+          color={lineColor}
+          strokeWidth={lineWidth}
           style="stroke"
         />
         {renderControl(
-          maxPos,
-          controlStyle?.color ? controlStyle.color : hysteresisLowColor
+          x_end,
+          controlStyle?.color ? controlStyle.color : lineColor
         )}
       </>
     );
   };
 
+  const renderHysteresisLow = () => {
+    return renderHysteresisLine(
+      showInverted ? 'top' : 'bottom',
+      min,
+      width - paddingRight,
+      hysteresisLowColor,
+      hysteresisLowWidth
+    );
+  };
+
   const renderHysteresisHigh = () => {
-    const minPos = calc_hysteresis_x_pos(min);
-    const path = Skia.Path.Make();
-
-    path.moveTo(minPos, x_axis_pos - hysteresis_axis_distance);
-    path.lineTo(minPos, hysteresis_height);
-    path.lineTo(width - paddingRight, hysteresis_height);
-    path.moveTo(0, 0);
-    path.close();
-
-    return (
-      <>
-        <Path
-          path={path}
-          color={hysteresisHighColor}
-          strokeWidth={hysteresisHighWidth}
-          style="stroke"
-        />
-        {renderControl(
-          minPos,
-          controlStyle?.color ? controlStyle.color : hysteresisHighColor
-        )}
-      </>
+    return renderHysteresisLine(
+      showInverted ? 'bottom' : 'top',
+      max,
+      paddingLeft,
+      hysteresisHighColor,
+      hysteresisHighWidth
     );
   };
 
