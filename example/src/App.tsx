@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import HysteresisControl from 'react-native-hysteresis';
-import type { Range } from '../../src/HysteresisControl.types';
+import type { Range } from 'react-native-hysteresis';
 
 const initialValues: Range = { min: 10, max: 40 };
 const backgroundColor = '#ffffff';
@@ -26,6 +26,7 @@ export default function App() {
           initialValues={initialValues}
           onChange={(value: Range) => setRange1(value)}
           showAxisLabels
+          showInverted
           style={{
             paddingBottom: 20,
             paddingLeft: 20,
