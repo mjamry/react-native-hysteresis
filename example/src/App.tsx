@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import HysteresisControl from 'react-native-hysteresis';
-import type { Range } from '../../src/HysteresisControl.types';
+import type { Range } from 'react-native-hysteresis';
 
 const initialValues: Range = { min: 10, max: 40 };
 const backgroundColor = '#ffffff';
@@ -25,7 +25,15 @@ export default function App() {
           step={5}
           initialValues={initialValues}
           onChange={(value: Range) => setRange1(value)}
-          showAxisLabels
+          xAxisSettings={{
+            showLabels: true,
+          }}
+          yAxisSettings={{
+            showAxis: true,
+            labels: { top: 'On', bottom: 'Off' },
+          }}
+          showInverted
+          unit="liters"
           style={{
             paddingBottom: 20,
             paddingLeft: 20,
@@ -56,6 +64,7 @@ export default function App() {
             size: 15,
             width: 15,
           }}
+          key={1}
         />
         <Text style={styles.valuesTextStyle}>
           Min: {range1.min} Max: {range1.max}
@@ -67,9 +76,15 @@ export default function App() {
           step={10}
           initialValues={initialValues}
           onChange={(value: Range) => setRange2(value)}
-          showAxisLabels
+          xAxisSettings={{
+            showLabels: true,
+            title: 'Temperature [°C]',
+          }}
+          yAxisSettings={{
+            showAxis: true,
+            labels: { top: 'Online', bottom: 'Offline' },
+          }}
           showControlLabel
-          showYAxis
           unit="°C"
           style={{
             height: 250,
@@ -80,6 +95,7 @@ export default function App() {
             width: 1,
             color: axisColor,
             fontColor: axisColor,
+            fontSize: 12,
           }}
           hysteresisLowStyle={{
             width: 2,
@@ -102,6 +118,7 @@ export default function App() {
             width: 65,
             fontSize: 24,
           }}
+          key={2}
         />
         <Text style={styles.valuesTextStyle}>
           Min: {range2.min} Max: {range2.max}
@@ -114,10 +131,12 @@ export default function App() {
           initialValues={initialValues}
           onChange={(value: Range) => setRange3(value)}
           showControlLabel
-          unit="mA"
+          unit="V"
+          xAxisSettings={{
+            title: 'Voltage [V]',
+          }}
           style={{
-            paddingBottom: 0,
-            paddingLeft: 0,
+            paddingLeft: 10,
             paddingTop: 0,
             paddingRight: 0,
             height: 200,
@@ -144,13 +163,10 @@ export default function App() {
             color: axisColor,
           }}
           controlLabelStyle={{
-            borderWidth: 2,
-            borderColor: axisColor,
-            backgroundColor: backgroundColor,
-            height: 35,
-            width: 50,
-            fontSize: 15,
+            borderWidth: 6,
+            fontSize: 20,
           }}
+          key={3}
         />
         <Text style={styles.valuesTextStyle}>
           Min: {range3.min} Max: {range3.max}

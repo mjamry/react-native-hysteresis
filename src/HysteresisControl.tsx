@@ -18,7 +18,10 @@ import {
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
-import type { HysteresisProps } from './HysteresisControl.types';
+import type {
+  HysteresisProps,
+  HysteresisPosition,
+} from './HysteresisControl.types';
 
 const styles = StyleSheet.create({
   container: {
@@ -39,19 +42,23 @@ const DefaultFontSize = 15;
 const DefaultFontStyle = 'normal';
 const DefaultFontFamily = 'arial';
 const DefaultFontColor = 'black';
-const DefaultControlLabelWidth = 35;
-const DefaultControlLabelHeight = 25;
-//TODO: allow to use inverted hysteresis lines
+const HysteresisAxisDistance = 20;
+const ControlLabelPadding = 5;
+const LabelAxisDistance = 5;
+const AxisLineLength = 10;
+const AxisLengthAddon = 5;
+
 const HysteresisControl = (props: HysteresisProps) => {
   const {
     range,
     initialValues,
     step,
     unit,
-    showAxisLabels,
+    xAxisSettings,
+    yAxisSettings,
     showControlLabel,
-    showYAxis,
     showFill,
+    showInverted,
     style,
     axisStyle,
     hysteresisLowStyle,
@@ -66,8 +73,9 @@ const HysteresisControl = (props: HysteresisProps) => {
   const [canChangeMax, setCanChangeMax] = useState(false);
   const [canShowMinLabel, setCanShowMinLabel] = useState(false);
   const [canShowMaxLabel, setCanShowMaxLabel] = useState(false);
-  const window = useWindowDimensions();
 
+  // general values config
+  const window = useWindowDimensions();
   const width = style?.width ?? window.width;
   const height = style?.height ?? DefaultHeight;
   const paddingTop = (style?.paddingTop ?? DefaultPadding) + RequiredPadding;
@@ -76,6 +84,8 @@ const HysteresisControl = (props: HysteresisProps) => {
   const paddingLeft = (style?.paddingLeft ?? DefaultPadding) + RequiredPadding;
   const paddingRight =
     (style?.paddingRight ?? DefaultPadding) + RequiredPadding;
+
+  // styles config
   const axisColor = axisStyle?.color ?? DefaultLineColor;
   const axisWidth = axisStyle?.width ?? DefaultLineWidth;
   const hysteresisLowColor = hysteresisLowStyle?.color ?? DefaultLineColor;
@@ -87,21 +97,41 @@ const HysteresisControl = (props: HysteresisProps) => {
   const controlBackground =
     controlStyle?.backgroundColor ?? DefaultBackgroundColor;
 
+  // axis configs
+  const axisFont = matchFont({
+    fontFamily: axisStyle?.fontFamily ?? DefaultFontFamily,
+    fontSize: axisStyle?.fontSize ?? DefaultFontSize,
+    fontStyle: axisStyle?.fontStyle ?? DefaultFontStyle,
+    fontWeight: axisStyle?.fontWeight ?? DefaultFontWeight,
+  });
+
   const axisLabelSize = axisStyle?.fontSize ?? DefaultFontSize;
   const x_axis_pos =
-    height - (showAxisLabels ? axisLabelSize : 0) - paddingBottom;
-  const y_axis_pos = paddingLeft;
-  const x_axis_len = width - paddingLeft - paddingRight;
-  const axis_line_length = 10;
-  const hysteresis_axis_distance = 20;
+    height -
+    (xAxisSettings?.showLabels ? axisLabelSize : 0) -
+    (xAxisSettings?.title ? axisLabelSize : 0) -
+    paddingBottom;
+
+  const y_axis_labels_width = yAxisSettings?.labels
+    ? axisFont.measureText(
+        yAxisSettings?.labels.top.length > yAxisSettings?.labels.bottom.length
+          ? yAxisSettings?.labels.top
+          : yAxisSettings?.labels.bottom
+      ).width
+    : 0;
+  const y_axis_pos = paddingLeft + y_axis_labels_width;
+
+  const x_axis_len = width - y_axis_pos - paddingRight;
   const line_space = x_axis_len / ((range.max - range.min) / step);
 
-  const hysteresis_height = paddingTop;
-  const control_y_pos = (x_axis_pos + hysteresis_height) / 2;
+  // hysteresis config
+  const hysteresis_y_bottom = x_axis_pos - HysteresisAxisDistance;
+  const hysteresis_y_top = paddingTop + AxisLengthAddon;
 
+  // control config
+  const control_y_pos = (x_axis_pos + hysteresis_y_top) / 2;
   const touch_radius =
     controlSize < MinTouchRadius ? MinTouchRadius : controlSize;
-  const label_y_pos = 40;
 
   useEffect(() => {
     setMin(initialValues.min);
@@ -115,16 +145,17 @@ const HysteresisControl = (props: HysteresisProps) => {
   const renderAxis = () => {
     const path = Skia.Path.Make();
     // x axis
-    path.moveTo(paddingLeft, x_axis_pos);
-    path.lineTo(width - paddingRight, x_axis_pos);
+    path.moveTo(y_axis_pos - AxisLengthAddon, x_axis_pos);
+    path.lineTo(width - paddingRight + AxisLengthAddon, x_axis_pos);
     // y axis
-    if (showYAxis) {
+    if (yAxisSettings?.showAxis || yAxisSettings?.labels) {
       path.moveTo(y_axis_pos, paddingTop);
       path.lineTo(y_axis_pos, x_axis_pos);
     }
 
-    const y_start = x_axis_pos - axis_line_length / 2;
-    const y_end = x_axis_pos + axis_line_length / 2;
+    const half_axis_line = AxisLineLength / 2;
+    const y_start = x_axis_pos - half_axis_line;
+    const y_end = x_axis_pos + half_axis_line;
 
     for (
       let i = y_axis_pos, index = range.min;
@@ -133,6 +164,14 @@ const HysteresisControl = (props: HysteresisProps) => {
     ) {
       path.moveTo(i, y_start);
       path.lineTo(i, y_end);
+    }
+
+    if (yAxisSettings?.showAxis || yAxisSettings?.labels) {
+      path.moveTo(y_axis_pos - half_axis_line, hysteresis_y_bottom);
+      path.lineTo(y_axis_pos + half_axis_line, hysteresis_y_bottom);
+
+      path.moveTo(y_axis_pos - half_axis_line, hysteresis_y_top);
+      path.lineTo(y_axis_pos + half_axis_line, hysteresis_y_top);
     }
 
     path.close();
@@ -145,33 +184,87 @@ const HysteresisControl = (props: HysteresisProps) => {
           strokeWidth={axisWidth}
           style="stroke"
         />
-        {showAxisLabels && renderAxisLabels()}
+        {renderAxisLabels()}
       </>
     );
   };
 
   const renderAxisLabels = () => {
     const output = [];
-    const font = matchFont({
-      fontFamily: axisStyle?.fontFamily ?? DefaultFontFamily,
-      fontSize: axisStyle?.fontSize ?? DefaultFontSize,
-      fontStyle: axisStyle?.fontStyle ?? DefaultFontStyle,
-      fontWeight: axisStyle?.fontWeight ?? DefaultFontWeight,
-    });
-    //TODO: render unit
-    //TODO: render On/Off on Y axis
-    for (
-      let i = y_axis_pos, index = range.min;
-      index <= range.max;
-      i += line_space, index += step
-    ) {
+
+    // render X axis labels
+    if (xAxisSettings?.showLabels) {
+      for (
+        let i = y_axis_pos, index = range.min;
+        index <= range.max;
+        i += line_space, index += step
+      ) {
+        const text = index.toString();
+        const textSize = axisFont.measureText(text);
+        output.push(
+          <Text
+            x={i - textSize.width / 2}
+            y={x_axis_pos + axisLabelSize + LabelAxisDistance}
+            text={index.toString()}
+            key={index}
+            font={axisFont}
+            color={axisStyle?.fontColor ?? DefaultFontColor}
+          />
+        );
+      }
+    }
+
+    // render X axis title
+    if (xAxisSettings?.title) {
+      const text = xAxisSettings?.title;
+      const textSize = axisFont.measureText(text);
+      const y_pos =
+        x_axis_pos +
+        (xAxisSettings?.showLabels
+          ? (axisLabelSize + LabelAxisDistance) * 2
+          : axisLabelSize + LabelAxisDistance);
       output.push(
         <Text
-          x={i - axisLabelSize / 3}
-          y={x_axis_pos + axisLabelSize + 5}
-          text={index.toString()}
-          key={index}
-          font={font}
+          x={y_axis_pos + x_axis_len / 2 - textSize.width / 2}
+          y={y_pos}
+          text={text}
+          font={axisFont}
+          color={axisStyle?.fontColor ?? DefaultFontColor}
+        />
+      );
+    }
+
+    // render Y axis labels
+    if (yAxisSettings?.labels) {
+      const text_bottom = yAxisSettings.labels.bottom;
+      const textSize_bottom = axisFont.measureText(text_bottom);
+      output.push(
+        <Text
+          x={
+            y_axis_pos -
+            textSize_bottom.width -
+            AxisLineLength / 2 -
+            LabelAxisDistance
+          }
+          y={hysteresis_y_bottom + textSize_bottom.height / 2}
+          text={text_bottom}
+          font={axisFont}
+          color={axisStyle?.fontColor ?? DefaultFontColor}
+        />
+      );
+      const text_top = yAxisSettings?.labels.top;
+      const textSize_top = axisFont.measureText(text_top);
+      output.push(
+        <Text
+          x={
+            y_axis_pos -
+            textSize_top.width -
+            AxisLineLength / 2 -
+            LabelAxisDistance
+          }
+          y={hysteresis_y_top + textSize_top.height / 2}
+          text={text_top}
+          font={axisFont}
           color={axisStyle?.fontColor ?? DefaultFontColor}
         />
       );
@@ -183,7 +276,7 @@ const HysteresisControl = (props: HysteresisProps) => {
   const renderHysteresisFill = () => {
     const x_start = calc_hysteresis_x_pos(min);
     const x_end = calc_hysteresis_x_pos(max) - x_start;
-    const y_start = hysteresis_height;
+    const y_start = hysteresis_y_top;
     const y_end = x_axis_pos - y_start;
 
     return (
@@ -218,12 +311,27 @@ const HysteresisControl = (props: HysteresisProps) => {
     );
   };
 
-  const renderHysteresisLow = () => {
-    const maxPos = calc_hysteresis_x_pos(max);
+  const renderHysteresisLine = (
+    position: HysteresisPosition,
+    value: number,
+    x_start: number,
+    lineColor: string,
+    lineWidth: number
+  ) => {
+    const x_end = calc_hysteresis_x_pos(value);
     const path = Skia.Path.Make();
-    path.moveTo(paddingLeft, x_axis_pos - hysteresis_axis_distance);
-    path.lineTo(maxPos, x_axis_pos - hysteresis_axis_distance);
-    path.lineTo(maxPos, hysteresis_height);
+    path.moveTo(
+      x_start,
+      position === 'bottom' ? hysteresis_y_top : hysteresis_y_bottom
+    );
+    path.lineTo(
+      x_end,
+      position === 'bottom' ? hysteresis_y_top : hysteresis_y_bottom
+    );
+    path.lineTo(
+      x_end,
+      position === 'bottom' ? hysteresis_y_bottom : hysteresis_y_top
+    );
     path.moveTo(0, 0);
     path.close();
 
@@ -231,48 +339,39 @@ const HysteresisControl = (props: HysteresisProps) => {
       <>
         <Path
           path={path}
-          color={hysteresisLowColor}
-          strokeWidth={hysteresisLowWidth}
+          color={lineColor}
+          strokeWidth={lineWidth}
           style="stroke"
         />
         {renderControl(
-          maxPos,
-          controlStyle?.color ? controlStyle.color : hysteresisLowColor
+          x_end,
+          controlStyle?.color ? controlStyle.color : lineColor
         )}
       </>
+    );
+  };
+
+  const renderHysteresisLow = () => {
+    return renderHysteresisLine(
+      showInverted ? 'top' : 'bottom',
+      min,
+      width - paddingRight,
+      hysteresisLowColor,
+      hysteresisLowWidth
     );
   };
 
   const renderHysteresisHigh = () => {
-    const minPos = calc_hysteresis_x_pos(min);
-    const path = Skia.Path.Make();
-
-    path.moveTo(minPos, x_axis_pos - hysteresis_axis_distance);
-    path.lineTo(minPos, hysteresis_height);
-    path.lineTo(width - paddingRight, hysteresis_height);
-    path.moveTo(0, 0);
-    path.close();
-
-    return (
-      <>
-        <Path
-          path={path}
-          color={hysteresisHighColor}
-          strokeWidth={hysteresisHighWidth}
-          style="stroke"
-        />
-        {renderControl(
-          minPos,
-          controlStyle?.color ? controlStyle.color : hysteresisHighColor
-        )}
-      </>
+    return renderHysteresisLine(
+      showInverted ? 'bottom' : 'top',
+      max,
+      y_axis_pos,
+      hysteresisHighColor,
+      hysteresisHighWidth
     );
   };
 
-  const renderLabel = (value: number) => {
-    const labelHeight = controlLabelStyle?.height ?? DefaultControlLabelHeight;
-    const labelWidth = controlLabelStyle?.width ?? DefaultControlLabelWidth;
-    const x_pos = calc_hysteresis_x_pos(value) - labelWidth / 2;
+  const renderLabel = (value: number, color: string) => {
     const radius = controlLabelStyle?.borderRadius ?? 0;
     const borderWidth = controlLabelStyle?.borderWidth ?? DefaultLineWidth;
     const font = matchFont({
@@ -284,6 +383,24 @@ const HysteresisControl = (props: HysteresisProps) => {
     const text = `${value}${unit ? unit : ''}`;
     const textSize = font.measureText(text);
 
+    const labelHeight =
+      controlLabelStyle?.height ??
+      textSize.height + (ControlLabelPadding + borderWidth) * 2;
+    const labelWidth =
+      controlLabelStyle?.width ??
+      textSize.width + (ControlLabelPadding + borderWidth) * 2;
+
+    const label_y_pos =
+      controlLabelStyle?.height ?? control_y_pos / 2 - labelHeight / 2;
+
+    let x_pos = calc_hysteresis_x_pos(value) - labelWidth / 2;
+    if (x_pos + labelWidth > width) {
+      x_pos = width - labelWidth;
+    }
+    if (x_pos < 0) {
+      x_pos = 0;
+    }
+
     return (
       <>
         <RoundedRect
@@ -292,7 +409,7 @@ const HysteresisControl = (props: HysteresisProps) => {
           width={labelWidth}
           height={labelHeight}
           r={radius}
-          color={controlLabelStyle?.borderColor ?? DefaultBackgroundColor}
+          color={controlLabelStyle?.borderColor ?? color}
         />
         <RoundedRect
           x={x_pos + borderWidth}
@@ -348,16 +465,27 @@ const HysteresisControl = (props: HysteresisProps) => {
     })
     .onUpdate((e) => {
       if (canChangeMin || canChangeMax) {
-        const newValue = Math.floor(e.x / line_space) * props.step + range.min;
+        const x = e.x - y_axis_pos;
+        const newValue = Math.floor(x / line_space) * step + range.min;
+        const newValueReal_x_pos = calc_hysteresis_x_pos(newValue);
         if (canChangeMin) {
-          if (newValue >= range.min && newValue < max) {
-            setMin(newValue);
-          }
+          if (
+            newValueReal_x_pos > e.x - line_space / 2 &&
+            newValueReal_x_pos < e.x + line_space / 2
+          )
+            if (newValue !== min && newValue >= range.min && newValue < max) {
+              setMin(newValue);
+            }
         }
 
         if (canChangeMax) {
-          if (newValue > min && newValue <= range.max) {
-            setMax(newValue);
+          if (
+            newValueReal_x_pos > e.x - line_space / 2 &&
+            newValueReal_x_pos < e.x + line_space / 2
+          ) {
+            if (newValue !== max && newValue > min && newValue <= range.max) {
+              setMax(newValue);
+            }
           }
         }
       }
@@ -373,8 +501,16 @@ const HysteresisControl = (props: HysteresisProps) => {
             {showFill && renderHysteresisFill()}
             {renderHysteresisLow()}
             {renderHysteresisHigh()}
-            {canShowMinLabel && showControlLabel ? renderLabel(min) : <></>}
-            {canShowMaxLabel && showControlLabel ? renderLabel(max) : <></>}
+            {canShowMinLabel && showControlLabel ? (
+              renderLabel(min, hysteresisLowColor)
+            ) : (
+              <></>
+            )}
+            {canShowMaxLabel && showControlLabel ? (
+              renderLabel(max, hysteresisHighColor)
+            ) : (
+              <></>
+            )}
           </Canvas>
         </GestureDetector>
       </View>
