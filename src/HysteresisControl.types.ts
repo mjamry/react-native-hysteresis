@@ -54,6 +54,7 @@ export type HysteresisProps = {
   onChange: (result: Range) => void;
   showAxisLabels?: boolean;
   yAxisLabels?: Labels;
+  xAxisTitle?: string;
   // TODO rethink/redesign
   showFill?: boolean;
   showYAxis?: boolean;

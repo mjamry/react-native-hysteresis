@@ -61,6 +61,7 @@ const HysteresisControl = (props: HysteresisProps) => {
     showFill,
     showInverted,
     yAxisLabels,
+    xAxisTitle,
     style,
     axisStyle,
     hysteresisLowStyle,
@@ -109,7 +110,10 @@ const HysteresisControl = (props: HysteresisProps) => {
 
   const axisLabelSize = axisStyle?.fontSize ?? DefaultFontSize;
   const x_axis_pos =
-    height - (showAxisLabels ? axisLabelSize : 0) - paddingBottom;
+    height -
+    (showAxisLabels ? axisLabelSize : 0) -
+    (xAxisTitle ? axisLabelSize : 0) -
+    paddingBottom;
 
   const y_axis_labels_width = yAxisLabels
     ? axisFont.measureText(
@@ -185,8 +189,32 @@ const HysteresisControl = (props: HysteresisProps) => {
           style="stroke"
         />
         {showAxisLabels && renderAxisLabels()}
+        {renderAxisTitle()}
       </>
     );
+  };
+
+  const renderAxisTitle = () => {
+    if (xAxisTitle) {
+      const text = xAxisTitle;
+      const textSize = axisFont.measureText(text);
+      const y_pos =
+        x_axis_pos +
+        (showAxisLabels
+          ? (axisLabelSize + LabelAxisDistance) * 2
+          : axisLabelSize + LabelAxisDistance);
+      return (
+        <Text
+          x={y_axis_pos + x_axis_len / 2 - textSize.width / 2}
+          y={y_pos}
+          text={text}
+          font={axisFont}
+          color={axisStyle?.fontColor ?? DefaultFontColor}
+        />
+      );
+    }
+
+    return <></>;
   };
 
   const renderAxisLabels = () => {
