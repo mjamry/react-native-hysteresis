@@ -25,6 +25,46 @@ export default function App() {
           step={5}
           initialValues={initialValues}
           onChange={(value: Range) => setRange1(value)}
+          xAxisSettings={{
+            showLabels: true,
+          }}
+          yAxisSettings={{
+            showAxis: true,
+            labels: { top: 'On', bottom: 'Off' },
+          }}
+          showInverted
+          unit="liters"
+          style={{
+            paddingBottom: 20,
+            paddingLeft: 20,
+            paddingTop: 20,
+            paddingRight: 20,
+            height: 250,
+            width: 300,
+            backgroundColor: backgroundColor,
+          }}
+          axisStyle={{
+            width: 2,
+            color: axisColor,
+            fontColor: axisColor,
+            fontSize: 15,
+            fontFamily: 'tahoma',
+            fontWeight: 'bold',
+            fontStyle: 'italic',
+          }}
+          hysteresisLowStyle={{
+            width: 4,
+            color: lowColor,
+          }}
+          hysteresisHighStyle={{
+            width: 4,
+            color: highColor,
+          }}
+          controlStyle={{
+            size: 15,
+            width: 15,
+          }}
+          key={1}
         />
         <Text style={styles.valuesTextStyle}>
           Min: {range1.min} Max: {range1.max}
@@ -42,7 +82,7 @@ export default function App() {
           }}
           yAxisSettings={{
             showAxis: true,
-            labels: { top: 'Turned ON', bottom: 'Turned OFF' },
+            labels: { top: 'Online', bottom: 'Offline' },
           }}
           showControlLabel
           unit="°C"
