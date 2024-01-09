@@ -465,16 +465,27 @@ const HysteresisControl = (props: HysteresisProps) => {
     })
     .onUpdate((e) => {
       if (canChangeMin || canChangeMax) {
-        const newValue = Math.floor(e.x / line_space) * props.step + range.min;
+        const x = e.x - y_axis_pos;
+        const newValue = Math.floor(x / line_space) * step + range.min;
+        const newValueReal_x_pos = calc_hysteresis_x_pos(newValue);
         if (canChangeMin) {
-          if (newValue >= range.min && newValue < max) {
-            setMin(newValue);
-          }
+          if (
+            newValueReal_x_pos > e.x - line_space / 2 &&
+            newValueReal_x_pos < e.x + line_space / 2
+          )
+            if (newValue !== min && newValue >= range.min && newValue < max) {
+              setMin(newValue);
+            }
         }
 
         if (canChangeMax) {
-          if (newValue > min && newValue <= range.max) {
-            setMax(newValue);
+          if (
+            newValueReal_x_pos > e.x - line_space / 2 &&
+            newValueReal_x_pos < e.x + line_space / 2
+          ) {
+            if (newValue !== max && newValue > min && newValue <= range.max) {
+              setMax(newValue);
+            }
           }
         }
       }
