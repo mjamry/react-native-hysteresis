@@ -42,28 +42,34 @@ export type FontStyle = {
 
 export type AxisStyle = LineStyle & FontStyle;
 
-export type HysteresisPosition = 'top' | 'bottom';
+export type XAxisSettings = {
+  showLabels?: boolean;
+  title?: string;
+};
 
-export type Labels = { top: string; bottom: string };
+export type YAxisSettings = {
+  showAxis?: boolean;
+  labels?: { top: string; bottom: string };
+};
+
+export type HysteresisPosition = 'top' | 'bottom';
 
 export type HysteresisProps = {
   range: Range;
   initialValues: Range;
   step: number;
-  unit?: string;
   onChange: (result: Range) => void;
-  showAxisLabels?: boolean;
-  yAxisLabels?: Labels;
-  xAxisTitle?: string;
-  // TODO rethink/redesign
-  showFill?: boolean;
-  showYAxis?: boolean;
+  unit?: string;
   showControlLabel?: boolean;
   showInverted?: boolean;
+  xAxisSettings?: XAxisSettings;
+  yAxisSettings?: YAxisSettings;
   style?: Style;
   axisStyle?: AxisStyle;
   hysteresisLowStyle?: LineStyle;
   hysteresisHighStyle?: LineStyle;
   controlStyle?: ControlStyle;
   controlLabelStyle?: ControlLabelStyle;
+  // TODO rethink/redesign
+  showFill?: boolean;
 };

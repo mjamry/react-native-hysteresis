@@ -54,13 +54,11 @@ const HysteresisControl = (props: HysteresisProps) => {
     initialValues,
     step,
     unit,
-    showAxisLabels,
+    xAxisSettings,
+    yAxisSettings,
     showControlLabel,
-    showYAxis,
     showFill,
     showInverted,
-    yAxisLabels,
-    xAxisTitle,
     style,
     axisStyle,
     hysteresisLowStyle,
@@ -110,15 +108,15 @@ const HysteresisControl = (props: HysteresisProps) => {
   const axisLabelSize = axisStyle?.fontSize ?? DefaultFontSize;
   const x_axis_pos =
     height -
-    (showAxisLabels ? axisLabelSize : 0) -
-    (xAxisTitle ? axisLabelSize : 0) -
+    (xAxisSettings?.showLabels ? axisLabelSize : 0) -
+    (xAxisSettings?.title ? axisLabelSize : 0) -
     paddingBottom;
 
-  const y_axis_labels_width = yAxisLabels
+  const y_axis_labels_width = yAxisSettings?.labels
     ? axisFont.measureText(
-        yAxisLabels.top.length > yAxisLabels.bottom.length
-          ? yAxisLabels.top
-          : yAxisLabels.bottom
+        yAxisSettings?.labels.top.length > yAxisSettings?.labels.bottom.length
+          ? yAxisSettings?.labels.top
+          : yAxisSettings?.labels.bottom
       ).width
     : 0;
   const y_axis_pos = paddingLeft + y_axis_labels_width;
@@ -150,7 +148,7 @@ const HysteresisControl = (props: HysteresisProps) => {
     path.moveTo(y_axis_pos - AxisLengthAddon, x_axis_pos);
     path.lineTo(width - paddingRight + AxisLengthAddon, x_axis_pos);
     // y axis
-    if (showYAxis) {
+    if (yAxisSettings?.showAxis || yAxisSettings?.labels) {
       path.moveTo(y_axis_pos, paddingTop);
       path.lineTo(y_axis_pos, x_axis_pos);
     }
@@ -168,7 +166,7 @@ const HysteresisControl = (props: HysteresisProps) => {
       path.lineTo(i, y_end);
     }
 
-    if (showYAxis) {
+    if (yAxisSettings?.showAxis || yAxisSettings?.labels) {
       path.moveTo(y_axis_pos - half_axis_line, hysteresis_y_bottom);
       path.lineTo(y_axis_pos + half_axis_line, hysteresis_y_bottom);
 
@@ -186,22 +184,46 @@ const HysteresisControl = (props: HysteresisProps) => {
           strokeWidth={axisWidth}
           style="stroke"
         />
-        {showAxisLabels && renderAxisLabels()}
-        {renderAxisTitle()}
+        {renderAxisLabels()}
       </>
     );
   };
 
-  const renderAxisTitle = () => {
-    if (xAxisTitle) {
-      const text = xAxisTitle;
+  const renderAxisLabels = () => {
+    const output = [];
+
+    // render X axis labels
+    if (xAxisSettings?.showLabels) {
+      for (
+        let i = y_axis_pos, index = range.min;
+        index <= range.max;
+        i += line_space, index += step
+      ) {
+        const text = index.toString();
+        const textSize = axisFont.measureText(text);
+        output.push(
+          <Text
+            x={i - textSize.width / 2}
+            y={x_axis_pos + axisLabelSize + LabelAxisDistance}
+            text={index.toString()}
+            key={index}
+            font={axisFont}
+            color={axisStyle?.fontColor ?? DefaultFontColor}
+          />
+        );
+      }
+    }
+
+    // render X axis title
+    if (xAxisSettings?.title) {
+      const text = xAxisSettings?.title;
       const textSize = axisFont.measureText(text);
       const y_pos =
         x_axis_pos +
-        (showAxisLabels
+        (xAxisSettings?.showLabels
           ? (axisLabelSize + LabelAxisDistance) * 2
           : axisLabelSize + LabelAxisDistance);
-      return (
+      output.push(
         <Text
           x={y_axis_pos + x_axis_len / 2 - textSize.width / 2}
           y={y_pos}
@@ -212,33 +234,9 @@ const HysteresisControl = (props: HysteresisProps) => {
       );
     }
 
-    return <></>;
-  };
-
-  const renderAxisLabels = () => {
-    const output = [];
-
-    for (
-      let i = y_axis_pos, index = range.min;
-      index <= range.max;
-      i += line_space, index += step
-    ) {
-      const text = index.toString();
-      const textSize = axisFont.measureText(text);
-      output.push(
-        <Text
-          x={i - textSize.width / 2}
-          y={x_axis_pos + axisLabelSize + LabelAxisDistance}
-          text={index.toString()}
-          key={index}
-          font={axisFont}
-          color={axisStyle?.fontColor ?? DefaultFontColor}
-        />
-      );
-    }
-
-    if (showAxisLabels && yAxisLabels) {
-      const text_bottom = yAxisLabels.bottom;
+    // render Y axis labels
+    if (yAxisSettings?.labels) {
+      const text_bottom = yAxisSettings.labels.bottom;
       const textSize_bottom = axisFont.measureText(text_bottom);
       output.push(
         <Text
@@ -254,7 +252,7 @@ const HysteresisControl = (props: HysteresisProps) => {
           color={axisStyle?.fontColor ?? DefaultFontColor}
         />
       );
-      const text_top = yAxisLabels.top;
+      const text_top = yAxisSettings?.labels.top;
       const textSize_top = axisFont.measureText(text_top);
       output.push(
         <Text
