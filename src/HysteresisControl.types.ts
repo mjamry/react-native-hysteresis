@@ -44,6 +44,8 @@ export type AxisStyle = LineStyle & FontStyle;
 
 export type HysteresisPosition = 'top' | 'bottom';
 
+export type Labels = { top: string; bottom: string };
+
 export type HysteresisProps = {
   range: Range;
   initialValues: Range;
@@ -51,6 +53,7 @@ export type HysteresisProps = {
   unit?: string;
   onChange: (result: Range) => void;
   showAxisLabels?: boolean;
+  yAxisLabels?: Labels;
   // TODO rethink/redesign
   showFill?: boolean;
   showYAxis?: boolean;
