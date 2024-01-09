@@ -42,9 +42,8 @@ const DefaultFontSize = 15;
 const DefaultFontStyle = 'normal';
 const DefaultFontFamily = 'arial';
 const DefaultFontColor = 'black';
-const DefaultControlLabelWidth = 35;
-const DefaultControlLabelHeight = 25;
 const HysteresisAxisDistance = 20;
+const ControlLabelPadding = 5;
 const LabelAxisDistance = 5;
 const AxisLineLength = 10;
 const AxisLengthAddon = 5;
@@ -135,7 +134,6 @@ const HysteresisControl = (props: HysteresisProps) => {
   const control_y_pos = (x_axis_pos + hysteresis_y_top) / 2;
   const touch_radius =
     controlSize < MinTouchRadius ? MinTouchRadius : controlSize;
-  const label_y_pos = 40;
 
   useEffect(() => {
     setMin(initialValues.min);
@@ -375,11 +373,7 @@ const HysteresisControl = (props: HysteresisProps) => {
     );
   };
 
-  // TODO add a color: string parameter to use instead of border color - this will match the hysteresis line color
-  const renderLabel = (value: number) => {
-    const labelHeight = controlLabelStyle?.height ?? DefaultControlLabelHeight;
-    const labelWidth = controlLabelStyle?.width ?? DefaultControlLabelWidth;
-    const x_pos = calc_hysteresis_x_pos(value) - labelWidth / 2;
+  const renderLabel = (value: number, color: string) => {
     const radius = controlLabelStyle?.borderRadius ?? 0;
     const borderWidth = controlLabelStyle?.borderWidth ?? DefaultLineWidth;
     const font = matchFont({
@@ -391,6 +385,24 @@ const HysteresisControl = (props: HysteresisProps) => {
     const text = `${value}${unit ? unit : ''}`;
     const textSize = font.measureText(text);
 
+    const labelHeight =
+      controlLabelStyle?.height ??
+      textSize.height + (ControlLabelPadding + borderWidth) * 2;
+    const labelWidth =
+      controlLabelStyle?.width ??
+      textSize.width + (ControlLabelPadding + borderWidth) * 2;
+
+    const label_y_pos =
+      controlLabelStyle?.height ?? control_y_pos / 2 - labelHeight / 2;
+
+    let x_pos = calc_hysteresis_x_pos(value) - labelWidth / 2;
+    if (x_pos + labelWidth > width) {
+      x_pos = width - labelWidth;
+    }
+    if (x_pos < 0) {
+      x_pos = 0;
+    }
+
     return (
       <>
         <RoundedRect
@@ -399,7 +411,7 @@ const HysteresisControl = (props: HysteresisProps) => {
           width={labelWidth}
           height={labelHeight}
           r={radius}
-          color={controlLabelStyle?.borderColor ?? DefaultBackgroundColor}
+          color={controlLabelStyle?.borderColor ?? color}
         />
         <RoundedRect
           x={x_pos + borderWidth}
@@ -480,8 +492,16 @@ const HysteresisControl = (props: HysteresisProps) => {
             {showFill && renderHysteresisFill()}
             {renderHysteresisLow()}
             {renderHysteresisHigh()}
-            {canShowMinLabel && showControlLabel ? renderLabel(min) : <></>}
-            {canShowMaxLabel && showControlLabel ? renderLabel(max) : <></>}
+            {canShowMinLabel && showControlLabel ? (
+              renderLabel(min, hysteresisLowColor)
+            ) : (
+              <></>
+            )}
+            {canShowMaxLabel && showControlLabel ? (
+              renderLabel(max, hysteresisHighColor)
+            ) : (
+              <></>
+            )}
           </Canvas>
         </GestureDetector>
       </View>
