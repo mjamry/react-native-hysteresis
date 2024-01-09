@@ -28,9 +28,16 @@ import { HysteresisControl } from "react-native-hysteresis";
 ```
 #### For better understanding see the included example app.
 
+##### Raw, without styling.
 ![Alt text](assets/image.png)
+##### Inverted hysteresis lines.
 ![Alt text](assets/image-1.png)
+##### Without axis labels just a title for X axis.
+Some styling for control label. Example of voltage control.
 ![Alt text](assets/image-2.png)
+##### With labels and title on axis
+Example of temperature control.
+![Alt text](assets/image-3.png)
 
 ## Contributing
 
